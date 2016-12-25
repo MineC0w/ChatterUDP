@@ -7,6 +7,7 @@ A UDP chat application.
 import Tkinter
 import socket
 import threading, time
+import Client
 
 __author__ = 'Yair'
 
@@ -33,7 +34,7 @@ def send(data):
         if selection not in chatters:
             print "Error: User not found"
         else:
-            soc.sendto(str(data), chatters[selection])
+            soc.sendto(str(data), chatters[selection].getSendAdd())
 
 def newChat():
     global mainWidgets, soc
@@ -67,7 +68,8 @@ def newChatForm():
 def addchat(ip, port, form):
     global mainWidgets, chatters
     mainWidgets["chatList"].insert(0, ip)
-    chatters[ip] = (ip, int(port))
+    newClient = Client.Client(ip, int(port))
+    chatters[ip] = newClient
     form.destroy()
 
 def receive():
@@ -75,6 +77,11 @@ def receive():
     while recMessage:
         try:
             (data, sender) = soc.recvfrom(1024)
+            if sender[0] not in mainWidgets["chatList"].get(0,Tkinter.END):
+                newClient = Client.Client(sender[0], sender[1])
+                mainWidgets["chatList"].insert(0, sender[0])
+                chatters[ip] = newClient
+            mainWidgets["chatBox"].insert(Tkinter.END, "%s (%s): %s\n" % (sender[0], str(sender[1]), data))
             print "Received %s from %s" % (str(data), str(sender))
         except socket.timeout:
             #print "Nothing received."
@@ -114,7 +121,7 @@ def main():
     mainWidgets["newChatBtn"].grid(row = 2, column = 0, sticky = Tkinter.W+Tkinter.E)
 
     soc.bind((ip, port))
-    soc.settimeout(1)
+    soc.settimeout(socketTimeout)
 
     window.protocol("WM_DELETE_WINDOW", lambda: kill(window, soc))
     receiveThread = threading.Thread(target = receive, args = ())
