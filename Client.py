@@ -14,5 +14,12 @@ class Client():
     def getSendAdd(self):
         return (self._ip, int(self._port))
 
+    def getChat(self):
+        return self._chatHistory
+
+    def addChat(self, data):
+        self._chatHistory += data
+
+
 
 
