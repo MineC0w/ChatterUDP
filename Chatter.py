@@ -21,8 +21,12 @@ recMessage = True # Receive message thread
 socketTimeout = 0.5 # Socket timeout set to 0.5 seconds
 
 
-ip = "localhost"
+ip = "172.17.2.80"
 port = 8820
+
+def getIp(c):
+    print c
+    return c._ip
 
 def send(data):
     global mainWidgets, soc, chatters
@@ -80,7 +84,7 @@ def receive():
             if sender[0] not in mainWidgets["chatList"].get(0,Tkinter.END):
                 newClient = Client.Client(sender[0], sender[1])
                 mainWidgets["chatList"].insert(0, sender[0])
-                chatters[ip] = newClient
+                chatters[sender[0]] = newClient
             mainWidgets["chatBox"].insert(Tkinter.END, "%s (%s): %s\n" % (sender[0], str(sender[1]), data))
             print "Received %s from %s" % (str(data), str(sender))
         except socket.timeout:
