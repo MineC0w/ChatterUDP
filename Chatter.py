@@ -7,7 +7,7 @@ A UDP chat application.
 import Tkinter
 import socket
 import threading, time
-import Client
+import ClientHandler
 import tkMessageBox
 from PIL import Image, ImageTk
 
@@ -78,7 +78,7 @@ def newChatForm():
 def addchat(ip, port, form):
     global mainWidgets, chatters
     mainWidgets["chatList"].insert(0, ip)
-    newClient = Client.Client(ip, int(port))
+    newClient = ClientHandler.Client(ip, int(port))
     chatters[ip] = newClient
     form.destroy()
 
@@ -88,7 +88,7 @@ def receive():
         try:
             (data, sender) = soc.recvfrom(1024)
             if sender[0] not in mainWidgets["chatList"].get(0,Tkinter.END):
-                newClient = Client.Client(sender[0], sender[1])
+                newClient = ClientHandler.Client(sender[0], sender[1])
                 mainWidgets["chatList"].insert(0, sender[0])
                 chatters[sender[0]] = newClient
             msg =  "%s (%s): %s\n" % (sender[0], str(sender[1]), data)
