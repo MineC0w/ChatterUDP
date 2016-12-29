@@ -1,28 +1,24 @@
-'''
+''' A UDP chat application. '''
 
-A UDP chat application.
-
-'''
-
-import Tkinter
-import socket
-import threading, time
 import ClientHandler
-import tkMessageBox
+import MessageHandler
+
+import Tkinter, tkMessageBox
+import socket
+import threading
+import time
 from PIL import Image, ImageTk
 
 __author__ = 'Yair'
 
-#Create UDP socket
+# Create UDP socket
 soc = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-chatters = {} # Active chatters dictionary
-mainWidgets = {} # Widgets of main form, actually not necessary and might be bad programming
-newChatWidgets = {} # This one is actually useless
-recMessage = True # Receive message thread
-socketTimeout = 0.5 # Socket timeout set to 0.5 seconds
-
-
+chatters = {}  # Active chatters dictionary
+mainWidgets = {}  # Widgets of main form, actually not necessary and might be bad programming
+newChatWidgets = {}  # This one is actually useless
+recMessage = True  # Receive message thread
+socketTimeout = 0.5  # Socket timeout set to 0.5 seconds
 
 
 ip = "10.0.0.6"
@@ -91,14 +87,14 @@ def receive():
                 newClient = ClientHandler.Client(sender[0], sender[1])
                 mainWidgets["chatList"].insert(0, sender[0])
                 chatters[sender[0]] = newClient
-            msg =  "%s (%s): %s\n" % (sender[0], str(sender[1]), data)
+            msg = "_%s (%s):_ %s\n" % (sender[0], str(sender[1]), data)
             mainWidgets["chatBox"].configure(state="normal")
-            mainWidgets["chatBox"].insert(Tkinter.END, msg)
+            MessageHandler.print_message(msg, mainWidgets["chatBox"])
             mainWidgets["chatBox"].configure(state="disabled")
             chatters[sender[0]].addChat(msg)
             print "Received %s from %s" % (str(data), str(sender))
         except socket.timeout:
-            #print "Nothing received."
+            # print "Nothing received."
             pass
 
 
@@ -117,6 +113,7 @@ def kill(window, sock):
 def main():
     global mainWidgets, soc
     window = Tkinter.Tk()
+
     window.wm_title("Chat! %s" % (str(ip)))
     mainWidgets["chatList"] = Tkinter.Listbox(window)
 
@@ -124,12 +121,9 @@ def main():
     mainWidgets["chatList"].grid(row = 0, column = 0,sticky=Tkinter.N+Tkinter.S)
 
     mainWidgets["chatBox"] = Tkinter.Text(window)
+    MessageHandler.setup(mainWidgets["chatBox"])
     mainWidgets["chatBox"].grid(row = 0, column = 1)
-    tstEmoji = Image.open("emojis/upside_down_smile.png")
 
-    tstEmoji2 = ImageTk.PhotoImage(tstEmoji.resize((16,16), Image.ANTIALIAS))
-
-    mainWidgets["chatBox"].image_create(Tkinter.END, image=tstEmoji2)
     mainWidgets["chatBox"].configure(state="disabled")
     mainWidgets["chatBox"].bind("<1>", lambda event:mainWidgets["chatBox"].focus_set())
     mainWidgets["chatInput"] = Tkinter.Entry(window)
