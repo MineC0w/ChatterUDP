@@ -12,7 +12,9 @@ TODO:(1) Fix problems with double fragmnet starters that never end
     (3) fragment object
 '''
 emoticon_size = (16,16)
-emoticon_list = ["upside_down_smile"]
+emoticon_size_long = (32,16)
+long_emojis = ["lenny"]
+emoticon_list = ["upside_down_smile", "cow", "eggplant", "surprised", "lenny", "shocked", "thinking", "smirk"]
 loaded_emoticons = {}
 garbage = 0
 class AtomicFragment:
@@ -34,7 +36,10 @@ def get_font(modifiers = []):
 
 def load_emoticon(emoji):
     # TODO: Make sure file exists
-    emoticon = ImageTk.PhotoImage(Image.open("emojis/%s.png" % emoji).resize(emoticon_size, Image.ANTIALIAS))
+    if emoji  not in long_emojis:
+        emoticon = ImageTk.PhotoImage(Image.open("emojis/%s.png" % emoji).resize(emoticon_size, Image.ANTIALIAS))
+    else:
+        emoticon = ImageTk.PhotoImage(Image.open("emojis/%s.png" % emoji).resize(emoticon_size_long, Image.ANTIALIAS))
     loaded_emoticons[emoji] = emoticon
     print "Loaded emoji/%s.png" % emoticon
 
