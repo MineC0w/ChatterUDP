@@ -26,14 +26,6 @@ class MolecularFragment():
         self.Fragments = []
         self.Modifier = modifier
 
-
-def get_font(modifiers = []):
-    font = tkFont.Font(family="Ariel", size="11", weight="normal", underline=1)
-    if "BOLD" in modifiers:
-        font["weight"] = "bold"
-    print font.actual()
-    return font
-
 def load_emoticon(emoji):
     # TODO: Make sure file exists
     if emoji  not in long_emojis:
@@ -48,11 +40,11 @@ def load_emoticons():
         if emoticon not in loaded_emoticons:  # Check if already loaded
             load_emoticon(emoticon)  # If not, load
 
-
-
+# Returns true if a special character can be broken by spaces
 def breakable(c):
     return c in [":"]
 
+# Fragments a message to
 def fragment_data(msg, modifier):
     break_ignore = [" ", "\n", "\r", "\t"]  # Characters that break between words
     special_chars = [":", "*", "~", "_"]  # Characters that mean special fragment

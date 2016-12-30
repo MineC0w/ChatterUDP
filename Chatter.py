@@ -35,7 +35,7 @@ def send(data):
         if selection not in chatters:
             print "Error: User not found"
         else:
-            soc.sendto(str(data), chatters[selection].getSendAdd())
+            soc.sendto(str(data), chatters[selection].address())
 
 def newChat():
     global mainWidgets, soc
@@ -46,10 +46,13 @@ def newChat():
         newChatForm()
 def onselect(evt):
     w = evt.widget
-    index = int(w.curselection()[0])
-    value = w.get(index)
-    mainWidgets["chatBox"].delete('1.0', Tkinter.END)
-    mainWidgets["chatBox"].insert(Tkinter.END, chatters[value].getChat())
+    if len(w.curselection()) > 0:
+        index = int(w.curselection()[0])
+        value = w.get(index)
+        mainWidgets["chatBox"].configure(state="normal")
+        mainWidgets["chatBox"].delete('1.0', Tkinter.END)
+        MessageHandler.print_message(chatters[value].get_chat(), mainWidgets["chatBox"])
+        mainWidgets["chatBox"].configure(state="disabled")
 
 def newChatForm():
     LoginForm = Tkinter.Tk() # Login Screen
@@ -75,7 +78,12 @@ def addchat(ip, port, form):
     global mainWidgets, chatters
     mainWidgets["chatList"].insert(0, ip)
     newClient = ClientHandler.Client(ip, int(port))
+    newClient.load_chat()
     chatters[ip] = newClient
+    mainWidgets["chatBox"].configure(state="normal")
+    MessageHandler.print_message(chatters[ip].get_chat(), mainWidgets["chatBox"])
+    mainWidgets["chatBox"].configure(state="disabled")
+
     form.destroy()
 
 def receive():
@@ -84,6 +92,7 @@ def receive():
         try:
             (data, sender) = soc.recvfrom(1024)
             if sender[0] not in mainWidgets["chatList"].get(0,Tkinter.END):
+                print "NEW SENDER"
                 newClient = ClientHandler.Client(sender[0], sender[1])
                 mainWidgets["chatList"].insert(0, sender[0])
                 chatters[sender[0]] = newClient
@@ -91,7 +100,8 @@ def receive():
             mainWidgets["chatBox"].configure(state="normal")
             MessageHandler.print_message(msg, mainWidgets["chatBox"])
             mainWidgets["chatBox"].configure(state="disabled")
-            chatters[sender[0]].addChat(msg)
+            chatters[sender[0]].add_chat(msg)
+            chatters[sender[0]].save_chat()
             print "Received %s from %s" % (str(data), str(sender))
         except socket.timeout:
             # print "Nothing received."
@@ -110,25 +120,34 @@ def kill(window, sock):
     time.sleep(socketTimeout)
     sock.close()
 
+def send_input(input):
+    send(input.get(0.0, Tkinter.END))
+    input.delete(0.0, Tkinter.END)
+def remove_user(evt):
+    w = evt.widget
+    if len(w.curselection()) != 0:
+        data = tkMessageBox.askyesno("Hey", "Hey")
+        if data:
+            w.delete(Tkinter.ANCHOR)
+
 def main():
     global mainWidgets, soc
     window = Tkinter.Tk()
-
     window.wm_title("Chat! %s" % (str(ip)))
-    mainWidgets["chatList"] = Tkinter.Listbox(window)
+    mainWidgets["chatList"] = Tkinter.Listbox(window, bg="gray")
 
     mainWidgets["chatList"].bind("<<ListboxSelect>>", onselect)
     mainWidgets["chatList"].grid(row = 0, column = 0,sticky=Tkinter.N+Tkinter.S)
-
+    mainWidgets["chatList"].bind("<Delete>", remove_user)
     mainWidgets["chatBox"] = Tkinter.Text(window)
     MessageHandler.setup(mainWidgets["chatBox"])
     mainWidgets["chatBox"].grid(row = 0, column = 1)
 
     mainWidgets["chatBox"].configure(state="disabled")
     mainWidgets["chatBox"].bind("<1>", lambda event:mainWidgets["chatBox"].focus_set())
-    mainWidgets["chatInput"] = Tkinter.Entry(window)
+    mainWidgets["chatInput"] = Tkinter.Text(window, height=2.5)
     mainWidgets["chatInput"].grid(row = 1, rowspan = 2,column = 1, sticky = Tkinter.W+Tkinter.E+Tkinter.S+Tkinter.N)
-    mainWidgets["sendInput"] = Tkinter.Button(window, text = "Send", command = lambda: send(mainWidgets["chatInput"].get()))
+    mainWidgets["sendInput"] = Tkinter.Button(window, text = "Send", command=lambda: send_input(mainWidgets["chatInput"]))
     mainWidgets["sendInput"].grid(row = 1, column = 0, sticky = Tkinter.W+Tkinter.E)
 
     mainWidgets["newChatBtn"] = Tkinter.Button(window, text = "New Chat", command = newChat)
