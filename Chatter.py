@@ -36,6 +36,12 @@ def send(data):
             print "Error: User not found"
         else:
             soc.sendto(str(data), chatters[selection].address())
+            msg = "_%s (%s):_ %s\n" % (ip, str(port), data)
+            mainWidgets["chatBox"].configure(state="normal")
+            MessageHandler.print_message(msg, mainWidgets["chatBox"])
+            mainWidgets["chatBox"].configure(state="disabled")
+            chatters[chatters[selection].address()[0]].add_chat(msg)
+            chatters[chatters[selection].address()[0]].save_chat()
 
 def newChat():
     global mainWidgets, soc

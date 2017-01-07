@@ -6,11 +6,7 @@ import time
 __author__ = 'Yair'
 
 # Returns a stack where each element is of same format
-'''
-TODO:(1) Fix problems with double fragmnet starters that never end
-    (2) implement fragment tree (fragments composed of fragments)
-    (3) fragment object
-'''
+
 emoticon_size = (16,16)
 emoticon_size_long = (32,16)
 long_emojis = ["lenny"]
