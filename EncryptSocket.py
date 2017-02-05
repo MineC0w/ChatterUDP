@@ -13,12 +13,16 @@ class EncryptedObject():
              else:
                  return (self.to_binary((n) / 2)) * 10
      def efficient_power(self, a, n, p):
+         print "ITERATE"
          if n == 1:
              return a % p
          else:
-             return (self.efficient_power(a, math.floor(n/2.0), p) * self.efficient_power(a, math.ceil(n/2.0), p)) % p
+
+             return (self.efficient_power(a, math.floor(n/2.0), p)**2 * a if n % 2 else 1) % p
 
      def is_prime(self, p):
+         if p == 2 or p == 3:
+             return True
          for i in range(1,5):
              a = random.randint(2, p-2)
              print "Checking %s..." % a
@@ -26,11 +30,22 @@ class EncryptedObject():
                  return False
          return True
 
-     def generate_prime(self):
-         pass
+     def generate_prime(self, max):
+         list = range(2, max)
+         for n in list:
+             print "Testing " + str(n)
+             if self.is_prime(n):
+                 # remove all multiples
+                 print n
+                 print list
+                 for i in range(n+n,max+n, n):
+                     if i in list: list.remove(i)
+         return list
+
      def __init__(self):
-         self._privateKey = self.generate_prime()
-         self._publicKey = self.generate_prime()
+         pass
+         #self._privateKey = self.generate_prime()
+         #self._publicKey = self.generate_prime()
 
 
 class EncryptedClient():
@@ -46,10 +61,8 @@ class EncryptedServer():
 
 def main():
     test = EncryptedObject()
-    for i in range(3,10):
-        print test.to_binary(i)
-    print test.efficient_power(12, 3, 7)
-    print (12**3) % 7
+    print test.is_prime(961748941)
+    print test.generate_prime(2**20)
 
 
 if __name__ == "__main__":
